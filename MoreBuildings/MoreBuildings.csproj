@@ -10,8 +10,4 @@
     <EnableHarmony>true</EnableHarmony>
     <IgnoreModFilePatterns>bathhouse_tiles.png, mine_lava.png, spring_outdoorsTileSheet.png, townInterior.png, walls_and_floors.png, assets[/\\]FishingShack[/\\]map-.tbin</IgnoreModFilePatterns>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Reference Include="PyTK" HintPath="$(GameModsPath)\PyTK\PyTK.dll" Private="False" />
-  </ItemGroup>
 </Project>

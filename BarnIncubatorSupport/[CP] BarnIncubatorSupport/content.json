@@ -1,0 +1,15 @@
+{
+	"Format": "1.22.0",
+	"Changes": [
+		{
+			"Action": "EditData",
+			"Target": "Data/BigCraftablesInformation",
+			"Fields": {
+				"254": {
+					"0": "Large Incubator",
+					"4": "Hatches eggs into baby animals. Place in a barn."
+				}
+			}
+		}
+	]
+}

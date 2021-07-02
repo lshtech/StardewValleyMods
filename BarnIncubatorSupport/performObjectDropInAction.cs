@@ -1,0 +1,60 @@
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using StardewValley;
+
+// ReSharper disable InconsistentNaming
+// ReSharper disable once RedundantAssignment
+namespace BarnIncubatorSupport
+{
+  internal class performObjectDropInAction
+  {
+    public static bool Prefix(ref Object __instance, ref Item dropInItem,
+      ref bool probe, ref Farmer who, ref bool __result)
+    {
+      __result = false;
+      if (__instance.isTemporarilyInvisible || !(dropInItem is Object))
+        return true;
+
+      var dropItem = (Object) dropInItem;
+
+      var isIncubator = IsIncubator(__instance);
+      var isOstrichIncubator = IsOstrichIncubator(__instance);
+      if (dropItem.Category != -5 || !isIncubator && !isOstrichIncubator) return true;
+      var eggInfo = IsAllowedInBarns(dropItem.ParentSheetIndex.ToString());
+      if (__instance.heldObject.Value != null ||
+          eggInfo[0] && !isOstrichIncubator ||
+          !eggInfo[0] && !isIncubator)
+        return false;
+
+      __instance.heldObject.Value = new Object(dropItem.ParentSheetIndex, 1);
+      if (probe) return true;
+      who.currentLocation.playSound("coin");
+      __instance.MinutesUntilReady = (eggInfo[0] ? 15000 : 9000) * (eggInfo[1] ? 2 : 1);
+      if (who.professions.Contains(2))
+        __instance.MinutesUntilReady /= 2;
+      ++__instance.ParentSheetIndex;
+      if (who?.currentLocation != null && who.currentLocation is AnimalHouse house)
+        house.hasShownIncubatorBuildingFullMessage = false;
+
+      __result = true;
+      return false;
+    }
+
+    private static bool IsIncubator(Object __instance) => new[] {101, 102, 193}.Contains(__instance.ParentSheetIndex);
+    private static bool IsOstrichIncubator(Object __instance) => new[] {254, 255}.Contains(__instance.ParentSheetIndex);
+
+    private static bool[] IsAllowedInBarns(string dropItemId)
+    {
+      var animals = Game1.content.Load<IDictionary<string, string>>(Path.Combine("Data", "FarmAnimals"));
+      foreach (var animal in animals)
+      {
+        var animalProps = animal.Value.Split('/');
+        if (animalProps[2] == dropItemId || animalProps[3] == dropItemId)
+          return new[] {animalProps[15].ToLower() == "barn", animal.Key.ToLower().Contains("dinosaur")};
+      }
+
+      return new[] {false, false};
+    }
+  }
+}

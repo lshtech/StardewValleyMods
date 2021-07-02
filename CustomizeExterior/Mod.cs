@@ -22,7 +22,7 @@ namespace CustomizeExterior
     {
         public const string SeasonalIndicator = "%";
 
-        private readonly TimeSpan ClickWindow = TimeSpan.FromMilliseconds(250);
+        private static readonly TimeSpan ClickWindow = new(250 * TimeSpan.TicksPerMillisecond);
 
         public static Mod Instance;
         public static SavedExteriors SavedExteriors = new();
@@ -165,35 +165,40 @@ namespace CustomizeExterior
         {
             if (Context.IsPlayerFree && e.Button == SButton.MouseRight)
             {
-                Point tile = Utility.Vector2ToPoint(e.Cursor.Tile);
-
-                if (Game1.currentLocation is BuildableGameLocation buildableLocation)
+                Point pos = new Point((int)e.Cursor.AbsolutePixels.X, (int)e.Cursor.AbsolutePixels.Y);
+                if (Game1.currentLocation is BuildableGameLocation)
                 {
-                    foreach (Building building in buildableLocation.buildings)
+                    var loc = Game1.currentLocation as BuildableGameLocation;
+
+                    foreach (Building building in loc.buildings)
                     {
-                        Rectangle tileBounds = new Rectangle(building.tileX.Value, building.tileY.Value, building.tilesWide.Value, building.tilesHigh.Value);
-                        if (tileBounds.Contains(tile))
+                        Rectangle tileBounds = new Rectangle(building.tileX.Value * Game1.tileSize, building.tileY.Value * Game1.tileSize, building.tilesWide.Value * Game1.tileSize, building.tilesHigh.Value * Game1.tileSize);
+                        if (tileBounds.Contains(pos.X, pos.Y))
                         {
-                            string id = building is GreenhouseBuilding
-                                ? "Greenhouse"
-                                : building.nameOfIndoors;
-                            string textureName = Path.GetFileName(building.textureName());
-
-                            Log.Trace($"Right clicked a building (id: {id}, texture: {textureName})");
-
-                            if (this.CheckBuildingClick(id, textureName))
-                                return;
+                            Log.Trace($"Right clicked a building: {building.nameOfIndoors}");
+                            this.CheckBuildingClick(building.nameOfIndoors, building.buildingType.Value);
                         }
                     }
                 }
-
-                if (Game1.currentLocation is Farm farm)
+                if (Game1.currentLocation is Farm)
                 {
-                    Rectangle house = farm.GetHouseRect();
-                    if (house.Contains(tile))
+                    Rectangle house = new Rectangle(59 * Game1.tileSize, 11 * Game1.tileSize, 9 * Game1.tileSize, 6 * Game1.tileSize);
+                    Rectangle greenhouse = new Rectangle(25 * Game1.tileSize, 10 * Game1.tileSize, 7 * Game1.tileSize, 6 * Game1.tileSize);
+                    if (Game1.whichFarm == Farm.fourCorners_layout)
+                    {
+                        greenhouse.X = 36 * Game1.tileSize;
+                        greenhouse.Y = 25 * Game1.tileSize;
+                    }
+
+                    if (house.Contains(pos.X, pos.Y))
                     {
                         Log.Trace("Right clicked the house.");
                         this.CheckBuildingClick("FarmHouse", "houses");
+                    }
+                    else if (greenhouse.Contains(pos.X, pos.Y))
+                    {
+                        Log.Trace("Right clicked the greenhouse.");
+                        this.CheckBuildingClick("Greenhouse", "houses");
                     }
                 }
             }
@@ -209,7 +214,7 @@ namespace CustomizeExterior
             string[] choices = Directory.GetDirectories(buildingsPath);
             foreach (string choice in choices)
             {
-                if (choice is "spring" or "summer" or "fall" or "winter")
+                if (choice == "spring" || choice == "summer" || choice == "fall" || choice == "winter")
                 {
                     Log.Warn("A seasonal texture set was installed incorrectly. '" + choice + "' should not be directly in the Buildings folder.");
                     continue;
@@ -297,10 +302,9 @@ namespace CustomizeExterior
 
         private DateTime RecentClickTime;
         private string RecentClickTarget;
-        private bool CheckBuildingClick(string target, string type)
+        private void CheckBuildingClick(string target, string type)
         {
-            if (Game1.activeClickableMenu != null)
-                return false;
+            if (Game1.activeClickableMenu != null) return;
 
             if (this.RecentClickTarget != target)
             {
@@ -309,21 +313,19 @@ namespace CustomizeExterior
             }
             else
             {
-                if (DateTime.Now - this.RecentClickTime < this.ClickWindow)
-                    return this.TryOpenCustomizationMenu(target, type);
+                if (DateTime.Now - this.RecentClickTime < Mod.ClickWindow)
+                    this.TodoRenameFunction(target, type);
                 else
                     this.RecentClickTime = DateTime.Now;
             }
-
-            return false;
         }
 
-        private bool TryOpenCustomizationMenu(string target, string type)
+        private void TodoRenameFunction(string target, string type)
         {
             if (!Mod.Choices.TryGetValue(type, out var choices))
             {
                 Log.Trace($"Target: {target} ({type}), but no custom textures found.");
-                return false;
+                return;
             }
             Log.Trace($"Target: {target} ({type}), found {choices.Count} textures: '{string.Join("', '", choices)}'.");
 
@@ -333,7 +335,6 @@ namespace CustomizeExterior
                 OnSelected = this.OnExteriorSelected
             };
             Game1.activeClickableMenu = menu;
-            return true;
         }
 
         private string RecentTarget;
