@@ -20,8 +20,9 @@ namespace BarnIncubatorSupport
 
       var isIncubator = IsIncubator(__instance);
       var isOstrichIncubator = IsOstrichIncubator(__instance);
-      if (dropItem.Category != -5 || !isIncubator && !isOstrichIncubator) return true;
+      if (dropItem.Category != -5 && !dropInItem.Name.Contains("Egg") || !isIncubator && !isOstrichIncubator) return true;
       var eggInfo = IsAllowedInBarns(dropItem.ParentSheetIndex.ToString());
+      if (eggInfo.Length == 0) return true;
       if (__instance.heldObject.Value != null ||
           eggInfo[0] && !isOstrichIncubator ||
           !eggInfo[0] && !isIncubator)
@@ -41,8 +42,8 @@ namespace BarnIncubatorSupport
       return false;
     }
 
-    private static bool IsIncubator(Object __instance) => new[] {101, 102, 193}.Contains(__instance.ParentSheetIndex);
-    private static bool IsOstrichIncubator(Object __instance) => new[] {254, 255}.Contains(__instance.ParentSheetIndex);
+    private static bool IsIncubator(Item __instance) => new[] {101, 102, 193}.Contains(__instance.ParentSheetIndex);
+    private static bool IsOstrichIncubator(Item __instance) => new[] {254, 255}.Contains(__instance.ParentSheetIndex);
 
     private static bool[] IsAllowedInBarns(string dropItemId)
     {
@@ -54,7 +55,7 @@ namespace BarnIncubatorSupport
           return new[] {animalProps[15].ToLower() == "barn", animal.Key.ToLower().Contains("dinosaur")};
       }
 
-      return new[] {false, false};
+      return new bool[0];
     }
   }
 }

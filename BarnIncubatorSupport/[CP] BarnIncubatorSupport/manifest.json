@@ -2,7 +2,7 @@
    "Name": "Content Patcher for Barn Incubator Support",
    "Author": "elbe",
    "Description": "Renames \"Ostrich Incubator\" to \"Large Incubator\"",
-   "Version": "1.0.0",
+   "Version": "1.0.1",
    "UniqueID": "elbe.BarnIncubatorSupportCP",
    "ContentPackFor": {
        "UniqueID": "Pathoschild.ContentPatcher"
