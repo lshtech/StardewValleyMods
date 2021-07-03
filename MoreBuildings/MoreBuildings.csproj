@@ -10,4 +10,8 @@
     <EnableHarmony>true</EnableHarmony>
     <IgnoreModFilePatterns>bathhouse_tiles.png, mine_lava.png, spring_outdoorsTileSheet.png, townInterior.png, walls_and_floors.png, assets[/\\]FishingShack[/\\]map-.tbin</IgnoreModFilePatterns>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Platonymous.PyTK" Version="1.12.40" />
+  </ItemGroup>
 </Project>
