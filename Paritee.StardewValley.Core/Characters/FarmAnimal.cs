@@ -92,6 +92,8 @@ namespace Paritee.StardewValley.Core.Characters
 
     public static Livestock VoidChicken => new Livestock("Void Chicken", 0.0);
 
+    public static Livestock GoldenChicken => new Livestock("Golden Chicken", 0.0);
+
     public static Livestock WhiteCow => new Livestock("White Cow", 0.0);
 
     public static Livestock BrownCow => new Livestock("Brown Cow", 0.0);
@@ -133,7 +135,8 @@ namespace Paritee.StardewValley.Core.Characters
           WhiteChicken,
           BrownChicken,
           BlueChicken,
-          VoidChicken
+          VoidChicken,
+          GoldenChicken
         };
         var buildings = new List<string>
         {
@@ -906,6 +909,7 @@ namespace Paritee.StardewValley.Core.Characters
         BrownChicken,
         BlueChicken,
         VoidChicken,
+        GoldenChicken,
         WhiteCow,
         BrownCow,
         Goat,
